@@ -33,12 +33,36 @@ const App = () => {
   const completedChores = chores.filter(item => item.completed === true);
   const incompleteChores = chores.filter(item => item.completed === false);
 
+  //input validation variables
+  var choreExists = false;
+  var noDate = false;
+  var noFrequency = false;
+
   function handleAdd () {
     //takes user input and adds it to the chores list
-    const completed = false;
-    const newList = chores.concat({ name, date, completed, frequency });
-    setChores(newList);
-    console.log(name, date, frequency)
+
+    //check date selected
+    if (date === "") {
+      noDate = true;
+    }
+
+    //check frequency selected
+    if (frequency === "") {
+      noFrequency = true;
+    }
+
+    //check if name already exists
+    for (let i = 0; i < chores.length; i++) {
+      if (chores[i].name === name) {
+        choreExists = true;
+      }
+    }
+
+    if (!choreExists) {
+      const completed = false;
+      const newList = chores.concat({ name, date, completed, frequency });
+      setChores(newList);
+    }
   }
 
   return (
@@ -52,6 +76,7 @@ const App = () => {
         <Dropdown placeHolder="Frequency?" options={frequencyOptions} onChange={(value) => setFrequency(value.value)} />
         <button onClick={handleAdd}>Add Chore</button>
       </p>
+      <handleAdd />
       <h1>To-Do</h1>
       <p>
         {incompleteChores.map((item) => (
