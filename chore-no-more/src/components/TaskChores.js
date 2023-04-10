@@ -17,6 +17,11 @@ export class TaskChores extends Component {
       };
   }
 
+  componentDidMount() {
+    this.getAuthToken();
+    this.loadToDo();
+  }
+
   getAuthToken() {
     supabase.auth.getSession()
     .then(value => {
@@ -62,13 +67,25 @@ export class TaskChores extends Component {
       this.insertChores();
     }
   }
+
+  getTaskList() {
+    var taskList = {
+      "title": "Chores"
+    }
+    if (this.state.token !== undefined) {
+      fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", {
+        method: "POST",
+        headers: {
+          'Authorization':'Bearer ' + this.state.token
+        },
+        body: JSON.stringify(taskList)
+      })
+    }
+  }
   
   loadToDo() {
     if (this.state.todos === undefined) {
-      if (this.state.token === undefined) {
-        this.getAuthToken();
-        //this.fetchChores();
-      }
+      if(this.state.)
       fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", { //getting tasks list
         method: "GET",
         headers: {
@@ -78,8 +95,13 @@ export class TaskChores extends Component {
         let respObj = response.json();
         respObj
         .then(data => {
-          let taskList = data.items.find(taskList => taskList.title === "Chores").id; //finding task list id
-          console.log(taskList)
+          let taskList = undefined;
+          let taskListList = data.items.find(taskList => taskList.title === "Chores"); //see if task list exists
+          if(taskListList === undefined) {
+            this.createTaskList()
+          } else {
+            taskList = taskListList.id
+          }
           fetch(`https://tasks.googleapis.com/tasks/v1/lists/${ taskList }/tasks`, { //getting tasks list
             method: "GET",
             headers: {
@@ -118,7 +140,6 @@ export class TaskChores extends Component {
     let loading = <p><em>Loading...</em></p>;
     let todosContent = undefined;
     if (this.state.taskList === undefined) {
-      this.loadToDo();
       todosContent = loading;
     } else {
       todosContent = <div><h1>Incomplete Tasks</h1>{this.state.todos.map(todo => <div><b>Chore:</b> {todo.title} - <b>Due:</b> {todo.due}</div>)}</div>
